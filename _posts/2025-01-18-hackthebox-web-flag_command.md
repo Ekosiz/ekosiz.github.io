@@ -2,7 +2,7 @@
 title: "HackTheBox: Flag Command" 
 date: 2025-01-18 01:28:59 +0000
 categories: [HackTheBox, Web]
-tags: [api, web, developer_tool, proxy]
+tags: [api, web, developer_tool]
 image:
     path: /images/hackthebox/web/flag_command/room_image.png
 ---
