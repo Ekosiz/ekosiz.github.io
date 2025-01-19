@@ -5,7 +5,8 @@ categories: [HackTheBox, Web]
 tags: [api, web, developer_tool]
 image:
     path: /images/hackthebox/web/flag_command/room_image.png
-excerpt: "Explore how I tackled the 'Flag Command' challenge on HackTheBox!" 
+excerpt: "Explore how I tackled the 'Flag Command' challenge on HackTheBox!"
+description: "Explore how I tackled the 'Flag Command' challenge on HackTheBox!"
 ---
 
 ## Details
