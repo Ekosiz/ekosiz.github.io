@@ -5,6 +5,7 @@ categories: [HackTheBox, FullPwn]
 tags: [snmp, daloradius, hash_cracking, privilege_escalation, mosh-server, nmap, directory_enum, fullpwn, linux]
 image:
     path: /images/hackthebox/fullpwn/underpass/room_image.png
+excerpt: "Explore how I tackled the 'UnderPass' challenge on HackTheBox!"
 ---
 
 
