@@ -77,5 +77,5 @@ jobs:
           curl -X POST -H "Content-Type: application/json" \
           -d '{"content": "A new post has been published! Check it out: ${{ steps.deployment.outputs.page_url }}"}' \
           ${{ secrets.DISCORD_WEBHOOK_URL }}
-        if: |
-          contains(github.event.head_commit.message, "Added writeup for")  # Optional: Check if commit message contains "Added writeup for"
+      if: |
+        contains(github.event.head_commit.message, "Added writeup for")  # Optional: Check if commit message contains "Added writeup for"
