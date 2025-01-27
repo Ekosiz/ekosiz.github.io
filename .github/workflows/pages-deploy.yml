@@ -71,3 +71,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Send Discord Notification
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+          -d '{"content": "A new post has been published! Check it out: ${{ steps.deployment.outputs.page_url }}"}' \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
+        if: |
+          contains(github.event.head_commit.message, "Added writeup for")  # Optional: Check if commit message contains "Added writeup for"
