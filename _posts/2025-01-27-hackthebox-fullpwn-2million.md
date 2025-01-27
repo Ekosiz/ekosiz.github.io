@@ -374,10 +374,10 @@ DB_USERNAME=admin
 DB_PASSWORD=SuperDuperPass123
 ```
 
-We have found credentials for admin:
+We have found credentials for admin for the local `MySQL` database:
 - `admin:SuperDuperPass123`
 
-Let's check which users present within the system.
+Let's verify which users are present within the system.
 
 ```bash
 www-data@2million:~/html$ cat /etc/passwd
@@ -423,7 +423,8 @@ _laurel:x:998:998::/var/log/laurel:/bin/false
 
 The user `admin` exists.
 
-After trying `SSH` into the machine with the found credentials:
+
+The credentials we have found is for `MySQL` database. However, we can attempt password reuse and try logging in via `SSH` with the same credentials.
 
 ```bash
 $ ssh admin@2million.htb
