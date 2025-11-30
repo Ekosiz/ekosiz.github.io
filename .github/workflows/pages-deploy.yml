@@ -31,9 +31,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # submodules: true
-          # If using the 'assets' git submodule from Chirpy Starter, uncomment above
-          # (See: https://github.com/cotes2020/chirpy-starter/tree/main/assets)
 
       - name: Setup Pages
         id: pages
@@ -53,8 +50,8 @@ jobs:
       - name: Test site
         run: |
           bundle exec htmlproofer _site \
-            \-\-disable-external \
-            \-\-ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/"
+            --disable-external \
+            --ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/"
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
@@ -72,23 +69,46 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+      # 1. We need to check out the code in the deploy step to see the git history
+      - name: Checkout Code for Notification
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # We only need the last few commits to compare
+
+      # 2. Extract filename, format URL, and send to Discord
       - name: Send Discord Notification
-        run: |
-          # Get all added files in this commit
-          ADDED_FILES=$(echo "${{ github.event.head_commit.added }}" | tr ' ' '\n')
-
-          # Filter only posts
-          NEW_POST=$(echo "$ADDED_FILES" | grep '^_posts/.*\.md$' | tail -n1)
-
-          if [ -n "$NEW_POST" ]; then
-            FILENAME=$(basename "$NEW_POST")
-            SLUG="${FILENAME%.*}"              # remove .md
-            SLUG="${SLUG#*-*-*-}"             # remove date prefix (YYYY-MM-DD-)
-            
-            POST_URL="${{ steps.deployment.outputs.page_url }}posts/$SLUG/"
-
-            curl -X POST -H "Content-Type: application/json" \
-            -d "{\"content\": \"A new post has been published! Check it out: $POST_URL\"}" \
-            ${{ secrets.DISCORD_WEBHOOK_URL }}
-          fi
         if: contains(github.event.head_commit.message, 'Added writeup for')
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          # Get the list of changed files in the commit
+          # We filter for files in _posts/ ending in .md
+          CHANGED_FILE=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep "_posts/.*\.md" | head -n 1)
+
+          if [ -z "$CHANGED_FILE" ]; then
+            echo "No markdown file found in _posts, skipping logic but sending generic link."
+            FINAL_URL="$PAGE_URL"
+          else
+            echo "Found file: $CHANGED_FILE"
+            
+            # Extract just the filename (e.g., 2023-11-30-my-writeup.md)
+            FILENAME=$(basename "$CHANGED_FILE")
+            
+            # Jekyll standard: Remove first 11 chars (YYYY-MM-DD-)
+            # This logic assumes your filenames always start with a date.
+            SLUG=${FILENAME:11}
+            
+            # Remove the .md extension
+            SLUG=${SLUG%.md}
+            
+            # Construct the Chirpy style URL: base_url + posts + slug
+            FINAL_URL="${PAGE_URL}posts/${SLUG}/"
+          fi
+
+          echo "Sending notification for: $FINAL_URL"
+
+          # Send curl request
+          curl -X POST -H "Content-Type: application/json" \
+          -d "{\"content\": \"📝 **New Writeup Published!**\n\n${{ github.event.head_commit.message }}\n\nRead it here: $FINAL_URL\"}" \
+          "$DISCORD_WEBHOOK_URL"
