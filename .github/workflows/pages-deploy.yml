@@ -110,5 +110,5 @@ jobs:
 
           # Send curl request
           curl -X POST -H "Content-Type: application/json" \
-          -d "{\"content\": \"📝 **New Writeup Published!**\n\n${{ github.event.head_commit.message }}\n\nRead it here: $FINAL_URL\"}" \
+          -d "{\"content\": \"📝 **New Writeup Published!**\n\nRead it here: $FINAL_URL\"}" \
           "$DISCORD_WEBHOOK_URL"
