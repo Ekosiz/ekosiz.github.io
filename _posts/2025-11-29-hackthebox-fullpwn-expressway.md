@@ -354,5 +354,5 @@ root@expressway:/# id
 uid=0(root) gid=0(root) groups=0(root),13(proxy),1001(ike)
 ```
 
-We have successfully owned the system :))
+We have successfully owned the system :)
 
