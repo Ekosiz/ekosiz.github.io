@@ -74,7 +74,17 @@ jobs:
 
       - name: Send Discord Notification
         run: |
+          # Extract the new post slug from the committed file
+          FILE_PATH=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep _posts)
+          FILENAME=$(basename "$FILE_PATH")
+          SLUG="${FILENAME%.*}"              # remove .md
+          SLUG="${SLUG#*-*-*-}"             # remove date prefix (YYYY-MM-DD-)
+
+          # Build full URL based on deployment output
+          POST_URL="${{ steps.deployment.outputs.page_url }}posts/$SLUG/"
+
+          # Send the Discord notification
           curl -X POST -H "Content-Type: application/json" \
-          -d '{"content": "A new post has been published! Check it out: ${{ steps.deployment.outputs.page_url }}"}' \
+          -d "{\"content\": \"A new post has been published! Check it out: $POST_URL\"}" \
           ${{ secrets.DISCORD_WEBHOOK_URL }}
-        if: contains(github.event.head_commit.message, 'Added writeup for') # Only send notification if commit message contains "Added writeup for"
+        if: contains(github.event.head_commit.message, 'Added writeup for')
