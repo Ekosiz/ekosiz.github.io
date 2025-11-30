@@ -74,17 +74,21 @@ jobs:
 
       - name: Send Discord Notification
         run: |
-          # Extract the new post slug from the committed file
-          FILE_PATH=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep _posts)
-          FILENAME=$(basename "$FILE_PATH")
-          SLUG="${FILENAME%.*}"              # remove .md
-          SLUG="${SLUG#*-*-*-}"             # remove date prefix (YYYY-MM-DD-)
+          # Get all added files in this commit
+          ADDED_FILES=$(echo "${{ github.event.head_commit.added }}" | tr ' ' '\n')
 
-          # Build full URL based on deployment output
-          POST_URL="${{ steps.deployment.outputs.page_url }}posts/$SLUG/"
+          # Filter only posts
+          NEW_POST=$(echo "$ADDED_FILES" | grep '^_posts/.*\.md$' | tail -n1)
 
-          # Send the Discord notification
-          curl -X POST -H "Content-Type: application/json" \
-          -d "{\"content\": \"A new post has been published! Check it out: $POST_URL\"}" \
-          ${{ secrets.DISCORD_WEBHOOK_URL }}
+          if [ -n "$NEW_POST" ]; then
+            FILENAME=$(basename "$NEW_POST")
+            SLUG="${FILENAME%.*}"              # remove .md
+            SLUG="${SLUG#*-*-*-}"             # remove date prefix (YYYY-MM-DD-)
+            
+            POST_URL="${{ steps.deployment.outputs.page_url }}posts/$SLUG/"
+
+            curl -X POST -H "Content-Type: application/json" \
+            -d "{\"content\": \"A new post has been published! Check it out: $POST_URL\"}" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+          fi
         if: contains(github.event.head_commit.message, 'Added writeup for')
