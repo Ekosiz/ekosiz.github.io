@@ -15,6 +15,14 @@ description: "Explore how I tackled the 'Expressway' challenge on HackTheBox!"
 [**Challenge Link**](https://app.hackthebox.com/machines/Expressway)
 
 ---
+## Summary
+In this challenge, I began with an Nmap scan that revealed only `SSH` on `TCP/22`, so I expanded my enumeration to `UDP` ports. This uncovered `UDP/500` running `ISAKMP`, indicating an IKE/IPsec VPN service. Using `ike-scan` in both Main Mode and Aggressive Mode, I enumerated the VPN configuration and extracted the identity `ike@expressway.htb` along with a PSK hash.
+
+I then performed offline cracking with Hashcat (mode 5400), successfully recovering the plaintext PSK. With both a username and password in hand, I attempted credential reuse over `SSH` — which worked, granting me access as the user ike.
+
+During privilege escalation, I identified that the system was using a manually installed sudo binary located in `/usr/local/bin/sudo`, running version 1.9.17. This version is vulnerable to `CVE-2025-32463`, a local privilege escalation flaw. Using a public PoC exploit, I executed the vulnerability and escalated directly to root.
+
+---
 
 ## Initial Enumeration
 
